@@ -70,6 +70,17 @@ router.get('/events/:eventId',isLoggedIn, (req, res, next) => {
    .catch( err => next(err) )
  })
 // post => save updates in the specific room
+router.get('/events/:eventId/update',isLoggedIn,(req,res,next) => {
+  Event.findById(req.params.eventId).populate('owner')
+  .populate({path: 'reviews', populate: {path:'user'}})
+  .then(foundEvent => {
+    if(foundEvent.owner.equals(req.session.currentUser._id)){
+      foundEvent.isOwner = true;
+    }
+    res.render('event-pages/event-update', { event: foundEvent } )
+    })
+    .catch( err => next(err) )
+  })
 router.post('/events/:eventId/update', (req, res, next) => {
  const { name, description } = req.body;
  const updatedEvent = {
@@ -79,7 +90,7 @@ router.post('/events/:eventId/update', (req, res, next) => {
  console.log(req.session.currentUser._id)
  Event.findByIdAndUpdate(req.params.eventId, updatedEvent) // <----------
  .then( theUpdatedEvent => {
-   res.redirect(`/events/${req.params.eventId}`);
+   res.redirect('/events');
  } )
  .catch( err => next(err) )
 })
@@ -87,7 +98,7 @@ router.post('/events/:eventId/update', (req, res, next) => {
 router.post('/events/:id/delete', (req, res, next) => {
  Event.findByIdAndDelete(req.params.id)
  .then(() => {
-   res.redirect('/events');
+   res.render('events');
  })
  .catch(err => next(err));
 })
