@@ -26,11 +26,11 @@ router.get('/create-event', (req, res, next) => {
  
  const nameEvent = req.body.name;
  const descriptionEvent = req.body.description;
- 
+ const imageUrl = req.body.imageUrl;
  Event.create({
    name: nameEvent,
    description: descriptionEvent,
-   imageUrl: '',
+   imageUrl: imageUrl,
    owner: req.session.currentUser._id
  })
  .then( newEvent => {
@@ -90,7 +90,7 @@ router.post('/events/:eventId/update', (req, res, next) => {
  console.log(req.session.currentUser._id)
  Event.findByIdAndUpdate(req.params.eventId, updatedEvent) // <----------
  .then( theUpdatedEvent => {
-   res.redirect('/events');
+  res.render('event-pages/event-details', { event: theUpdatedEvent } )
  } )
  .catch( err => next(err) )
 })
